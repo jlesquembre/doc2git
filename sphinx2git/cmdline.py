@@ -34,6 +34,12 @@ def main():
                                    'config', 's2g.ini')
     config = configparser.ConfigParser()
     config.read(config_filename)
+
+    user_config_path = os.path.join(os.getcwd(), 's2g.ini')
+    if os.path.exists(user_config_path):
+        pass
+
+
     for section in config.sections():
         cprint (section, color=HEAD)
         print(section)
