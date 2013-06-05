@@ -4,9 +4,12 @@ import tempfile
 import shutil
 import shlex
 import configparser
+import sys
+import sarge
 
 DOCS = 'docs/source'
 EXCLUDE = ['.buildinfo']
+INI_FILE = 's2g.ini'
 
 HEAD = 95
 BLUE = 94
@@ -15,7 +18,7 @@ WARN = 93
 FAIL = 91
 ENDC = '\033[0m'
 
-def cprint(*text, color=None):
+def cprint(*text, color=HEAD):
 
     out = '{}'* len(text)
     out = out.format(*text)
@@ -27,26 +30,60 @@ def cprint(*text, color=None):
         print (out)
 
 
+gitpath = None
+
+def get_git_path():
+    wd = os.getcwd()
+
+    while wd != '/':
+        path = os.path.join(wd,'.git')
+        if os.path.exists(path):
+            return wd
+
+        wd = os.path.split(wd)[0]
+
+    cprint('!!!  Not a git repository', FAIL)
+    sys.exit(0)
+
+
 def main():
 
+    global gitpath
+    gitpath = get_git_path()
+
+    conf = get_conf()
+
+    remote = get_remote(conf['git']['service'])
+
+
+def get_conf():
 
     config_filename = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                   'config', 's2g.ini')
+                                   'config', INI_FILE)
     config = configparser.ConfigParser()
     config.read(config_filename)
 
-    user_config_path = os.path.join(os.getcwd(), 's2g.ini')
-    if os.path.exists(user_config_path):
-        pass
+    user_config_path = os.path.join(gitpath, INI_FILE)
+
+    if not os.path.exists(user_config_path):
+        cprint('===  User configuration not found, using default values.')
+        return config
+
+    user_config = configparser.ConfigParser()
+    user_config.read(user_config_path)
+
+    cprint('===  User configuration found.')
+
+    try:
+        for section in user_config.sections():
+            for key in user_config[section]:
+                config[section][key] = user_config[section][key]
+    except KeyError:
+        cprint('###  Unknow option: ', key,' in section ', section, color=WARN )
 
 
-    for section in config.sections():
-        cprint (section, color=HEAD)
-        print(section)
-        for key in config[section]:
-            cprint (key,'   ', config[section][key], color=OK)
+    return config
 
-    print ('aaa')
 
 def run(command, capture_out=True, show_err=False):
 
@@ -61,14 +98,31 @@ def run(command, capture_out=True, show_err=False):
 
     return out.strip(), ret
 
+def run(command, ret_out=False, cwd=None):
+    cprint ('===')
+    cprint ('=== Command: ', command)
+    cprint ('=== CWD:     ', cwd)
+    cprint ('===')
 
-def get_remote():
+    if ret_out:
+        proc = sarge.capture_stdout(command)
+        print (proc.stdout.decode(), end='')
+        return proc.stdout.decode()
+    else:
+        sarge.run(command)
+
+    if proc.returncode ==
+
+
+
+
+def get_remote(service):
     out, ret = run('git remote -v')
     if ret != 0:
         raise Exception('Not a git repository!')
 
     for line in out.splitlines():
-        if 'push' in line and 'git@github.com' in line:
+        if 'push' in line and service in line:
             return line.split()[1]
 
     raise Exception('No github remote found!')
@@ -95,8 +149,11 @@ def push_to_gh_pages(remote, doc_path):
     os.chdir('..')
 
 
-
 if __name__ == '__main__':
+    main()
+
+#if __name__ == '__main__':
+def a():
     remote = get_remote()
     cwd = os.getcwd()
     with tempfile.TemporaryDirectory(prefix='git') as tmp:

@@ -31,5 +31,6 @@ setup(name='sphinx2git',
             'sphinx2git = sphinx2git.cmdline:main',
             's2g = sphinx2git.cmdline:main',
           ],
-        }
+        },
+      requires=['sarge']
     )
