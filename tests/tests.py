@@ -12,8 +12,8 @@ except ImportError:
 
 #from nosetests import *
 from sphinx2git import cmdline
-from sphinx2git.cmdline import get_git_path, get_conf, run, get_remote
-
+from sphinx2git.cmdline import (get_git_path, get_conf, run, get_remote,
+                                check_exit_code)
 
 class TestCaseWithTmp(TestCase):
 
@@ -97,6 +97,10 @@ class TestRun(TestCaseWithTmp):
 
         self.assertEqual(self.tempd, out)
 
+    def test_invalid_command(self):
+        self.assertRaises(SystemExit, run, 'false' )
+
+
 class TestGetGitRemote(TestCaseWithTmp):
 
     @classmethod
@@ -107,5 +111,17 @@ class TestGetGitRemote(TestCaseWithTmp):
 
     def test_get_first_remote(self):
         with mock.patch('sphinx2git.cmdline.run') as runmock:
-            runmock.return_value = self.cmdout   #'aaa'
+            runmock.return_value = self.cmdout
             self.assertEqual(get_remote('github'), 'git@github.com:user/repo.git')
+
+
+    def test_get_remote_with_name(self):
+        with mock.patch('sphinx2git.cmdline.run') as runmock:
+            runmock.return_value = self.cmdout
+            self.assertEqual(get_remote('github', 'foo'), 'git@github.com:foo/bar.git')
+
+
+    def test_remote_no_exists(self):
+        with mock.patch('sphinx2git.cmdline.run') as runmock:
+            runmock.return_value = self.cmdout
+            self.assertRaises(SystemExit, get_remote, 'bitbucket')

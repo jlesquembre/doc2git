@@ -46,21 +46,6 @@ def get_git_path():
     sys.exit(0)
 
 
-def main():
-
-    global GITPATH
-    GITPATH = get_git_path()
-
-    conf = get_conf()
-
-    if conf['git']['remote'] == '':
-        remote_name = None
-    else:
-        remote_name = conf['git']['remote']
-
-    remote = get_remote(conf['git']['service'], conf['git']['remote'])
-
-    generate_output()
 
 
 def get_conf():
@@ -131,7 +116,7 @@ def run(command, get_output=False, cwd=None):
         check_exit_code(proc.returncode)
         return out
     else:
-        proc = sarge.run(command, cwd=cwd)
+        proc = sarge.run(command, async=True, cwd=cwd)
         check_exit_code(proc.returncode)
 
 
@@ -140,10 +125,7 @@ def run(command, get_output=False, cwd=None):
 
 def get_remote(service, remote_name=''):
     out = run('git remote -v', get_output=True)
-    #if ret != 0:
-    #    raise Exception('Not a git repository!')
 
-    # TODO remote is origin???
     for line in out.splitlines():
         if 'push' in line and service in line:
             if remote_name == '':
@@ -180,21 +162,34 @@ def push_to_gh_pages(remote, doc_path):
 #    main()
 
 #if __name__ == '__main__':
-def generate_output():
-    #remote = get_remote()
-    #cwd = os.getcwd()
+def generate_output(command):
+
     with tempfile.TemporaryDirectory(prefix='d2g_generated_doc') as tmp:
 
-        shutil.copytree(GITPATH, os.path.join(tmp, 'copy'), ignore=shutil.ignore_patterns('.*'))
+        temp_dir = os.path.join(tmp, 'copy')
+        shutil.copytree(GITPATH, temp_dir , ignore=shutil.ignore_patterns('.git'))
 
-        doc_path = os.path.join(tmp, 'html')
-        run('sphinx-build -W -b html -d {} {} {}', cwd=None)
-        #run('sphinx-build -W -b html -d {} {} {}'.
-        #        format(os.path.join(tmp, 'doctrees'),
-        #               os.path.join(tmp, 'copy', DOCS),
-        #               doc_path), False)
+        run(command, cwd=temp_dir)
 
-        os.chdir(tmp)
 
-        os.chdir(tmp)
-        push_to_gh_pages(remote, doc_path)
+        #push_to_gh_pages(remote, doc_path)
+
+
+
+def main():
+
+    global GITPATH
+    GITPATH = get_git_path()
+
+    conf = get_conf()
+
+    if conf['git']['remote'] == '':
+        remote_name = None
+    else:
+        remote_name = conf['git']['remote']
+
+    remote = get_remote(conf['git']['service'], conf['git']['remote'])
+
+    generate_output(conf['doc']['command'])
+
+    push_doc(remote, conf['doc']['output_folder'], conf['doc']['exclude'], conf['doc']['extra'])
