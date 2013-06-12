@@ -6,7 +6,7 @@ import sys
 
 from unittest import TestCase
 try:
-    from unitest import mock
+    from unittest import mock
 except ImportError:
     import mock
 
