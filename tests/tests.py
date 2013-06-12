@@ -15,7 +15,7 @@ from sarge import shell_format
 #from nosetests import *
 from sphinx2git import cmdline
 from sphinx2git.cmdline import (get_git_path, get_conf, run, get_remote,
-                                check_exit_code, generate_output)
+                                check_exit_code, generate_output, push_doc)
 
 class TestCaseWithTmp(TestCase):
 
@@ -135,13 +135,31 @@ class TestGenerateOutput(TestCaseWithTmp):
         os.makedirs('.git')
         os.makedirs('test_dir')
 
-        with tempfile.TemporaryDirectory(prefix='test') as tmp_test:
+        with tempfile.TemporaryDirectory(prefix='test') as tmp_test,\
+                tempfile.TemporaryDirectory(prefix='d2g_') as tmp:
 
-            generate_output(shell_format('cp -r test_dir {0}', tmp_test))
+            generate_output(shell_format('cp -r test_dir {0}', tmp_test), tmp)
 
             self.assertTrue(os.path.exists(os.path.join(tmp_test, 'test_dir')))
             self.assertFalse(os.path.exists(os.path.join(tmp_test, '.git')))
 
 
 
+class TestPushDoc(TestCaseWithTmp):
 
+    def test_push(self):
+        # Create git repo to be used as remote
+        sarge.run('touch readme', cwd=self.tempd)
+        sarge.run('git init', cwd=self.tempd)
+        sarge.run('git add .', cwd=self.tempd)
+        sarge.run('git commit -m "Test"', cwd=self.tempd)
+
+        with tempfile.TemporaryDirectory(prefix='test') as tmp:
+            output_dir = os.path.join(tmp, 'copy', 'output')
+            os.makedirs(output_dir)
+            sarge.run('touch output.txt', cwd=output_dir)
+
+            push_doc(self.tempd, 'dev', 'output', ['exclude'], '', tmp)
+
+            command = sarge.run('git checkout dev', cwd=self.tempd)
+            self.assertEqual(command.returncode, 0)
