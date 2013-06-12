@@ -116,7 +116,7 @@ def run(command, get_output=False, cwd=None):
         check_exit_code(proc.returncode)
         return out
     else:
-        proc = sarge.run(command, async=True, cwd=cwd)
+        proc = sarge.run(command, cwd=cwd)
         check_exit_code(proc.returncode)
 
 
@@ -137,8 +137,8 @@ def get_remote(service, remote_name=''):
     sys.exit(0)
 
 
-def push_doc(output, exclude, extra):#remote, doc_path):
-    run('git clone {} -b gh-pages tmp_repo'.format(remote), False)
+def push_doc(remote, output, exclude, extra):
+    run('git clone {} -b gh-pages tmp_repo'.format(remote))
     os.chdir('tmp_repo')
     out, ret = run('git show-ref --verify --quiet refs/heads/gh-pages')
 
@@ -158,10 +158,6 @@ def push_doc(output, exclude, extra):#remote, doc_path):
     os.chdir('..')
 
 
-#if __name__ == '__main__':
-#    main()
-
-#if __name__ == '__main__':
 def generate_output(command):
 
     with tempfile.TemporaryDirectory(prefix='d2g_generated_doc') as tmp:
@@ -170,10 +166,6 @@ def generate_output(command):
         shutil.copytree(GITPATH, temp_dir, ignore=shutil.ignore_patterns('.git'))
 
         run(command, cwd=temp_dir)
-
-
-        #push_to_gh_pages(remote, doc_path)
-
 
 
 def main():

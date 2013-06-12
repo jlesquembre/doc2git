@@ -10,10 +10,12 @@ try:
 except ImportError:
     import mock
 
+from sarge import shell_format
+
 #from nosetests import *
 from sphinx2git import cmdline
 from sphinx2git.cmdline import (get_git_path, get_conf, run, get_remote,
-                                check_exit_code)
+                                check_exit_code, generate_output)
 
 class TestCaseWithTmp(TestCase):
 
@@ -125,3 +127,21 @@ class TestGetGitRemote(TestCaseWithTmp):
         with mock.patch('sphinx2git.cmdline.run') as runmock:
             runmock.return_value = self.cmdout
             self.assertRaises(SystemExit, get_remote, 'bitbucket')
+
+class TestGenerateOutput(TestCaseWithTmp):
+
+    def test_generate_output(self):
+
+        os.makedirs('.git')
+        os.makedirs('test_dir')
+
+        with tempfile.TemporaryDirectory(prefix='test') as tmp_test:
+
+            generate_output(shell_format('cp -r test_dir {0}', tmp_test))
+
+            self.assertTrue(os.path.exists(os.path.join(tmp_test, 'test_dir')))
+            self.assertFalse(os.path.exists(os.path.join(tmp_test, '.git')))
+
+
+
+
