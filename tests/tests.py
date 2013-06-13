@@ -3,6 +3,7 @@ import os
 import shutil
 from io import StringIO
 import sys
+from subprocess import DEVNULL
 
 from unittest import TestCase
 try:
@@ -10,7 +11,7 @@ try:
 except ImportError:
     import mock
 
-from sarge import shell_format
+import sarge
 
 #from nosetests import *
 from sphinx2git import cmdline
@@ -138,7 +139,7 @@ class TestGenerateOutput(TestCaseWithTmp):
         with tempfile.TemporaryDirectory(prefix='test') as tmp_test,\
                 tempfile.TemporaryDirectory(prefix='d2g_') as tmp:
 
-            generate_output(shell_format('cp -r test_dir {0}', tmp_test), tmp)
+            generate_output(sarge.shell_format('cp -r test_dir {0}', tmp_test), tmp)
 
             self.assertTrue(os.path.exists(os.path.join(tmp_test, 'test_dir')))
             self.assertFalse(os.path.exists(os.path.join(tmp_test, '.git')))
@@ -148,18 +149,51 @@ class TestGenerateOutput(TestCaseWithTmp):
 class TestPushDoc(TestCaseWithTmp):
 
     def test_push(self):
-        # Create git repo to be used as remote
-        sarge.run('touch readme', cwd=self.tempd)
-        sarge.run('git init', cwd=self.tempd)
-        sarge.run('git add .', cwd=self.tempd)
-        sarge.run('git commit -m "Test"', cwd=self.tempd)
 
+        repo_dir = os.path.join(self.tempd, 'normal_repo')
+        bare_dir = os.path.join(self.tempd, 'bare_repo')
+
+        os.makedirs(repo_dir)
+
+        # Create git repo to be used as remote
+        sarge.capture_both('touch readme', cwd=repo_dir, stdout=DEVNULL)
+        sarge.capture_both('git init', cwd=repo_dir, stdout=DEVNULL)
+        sarge.capture_both('git add .', cwd=repo_dir, stdout=DEVNULL)
+        sarge.capture_both('git commit -m "Test"', cwd=repo_dir, stdout=DEVNULL)
+
+        sarge.capture_both('git clone --bare {} bare_repo'.format(repo_dir), cwd=self.tempd)
+        # First push
         with tempfile.TemporaryDirectory(prefix='test') as tmp:
             output_dir = os.path.join(tmp, 'copy', 'output')
             os.makedirs(output_dir)
-            sarge.run('touch output.txt', cwd=output_dir)
+            sarge.capture_both('touch output.txt', cwd=output_dir, stdout=DEVNULL)
 
-            push_doc(self.tempd, 'dev', 'output', ['exclude'], '', tmp)
+            #with mock.patch('sarge.run') as runmock:
+            #   runmock = sarge.capture_both
+            push_doc(bare_dir, 'dev', 'Commit msg', 'output', ['exclude'], '', tmp)
 
-            command = sarge.run('git checkout dev', cwd=self.tempd)
-            self.assertEqual(command.returncode, 0)
+            files = sarge.get_stdout('git ls-tree --name-only -r dev', cwd=bare_dir)
+            self.assertTrue('output.txt' in files.split())
+
+        # Push again ...
+        with tempfile.TemporaryDirectory(prefix='test') as tmp:
+            output_dir = os.path.join(tmp, 'copy', 'output')
+            os.makedirs(output_dir)
+            sarge.capture_both('touch output_2.txt', cwd=output_dir, stdout=DEVNULL)
+
+            push_doc(bare_dir, 'dev', 'New msg', 'output', ['exclude'], '', tmp)
+
+            #out = sarge.get_stdout('git log dev~2..dev~1 --pretty=format:%s', cwd=bare_dir)
+            #self.assertEqual(out, 'Commit msg')
+
+            out = sarge.get_stdout('git log dev -1 --pretty=format:%s', cwd=bare_dir)
+            self.assertEqual(out, 'New msg')
+
+            files = sarge.get_stdout('git ls-tree --name-only -r dev', cwd=bare_dir)
+            self.assertTrue('output_2.txt' in files.split())
+            self.assertFalse('output.txt' in files.split())
+
+
+
+
+
