@@ -1,11 +1,11 @@
-import subprocess
+from subprocess import DEVNULL
 import os
 import tempfile
 import shutil
 import shlex
 import configparser
 import sys
-import sarge
+from sarge import run as sarge_run, capture_stdout
 
 DOCS = 'docs/source'
 EXCLUDE = ['.buildinfo']
@@ -110,13 +110,13 @@ def run(command, get_output=False, cwd=None):
     cprint ('===')
 
     if get_output:
-        proc = sarge.capture_stdout(command, cwd=cwd)
+        proc = capture_stdout(command, cwd=cwd)
         out = proc.stdout.read().decode()
         print(out, end='')
         check_exit_code(proc.returncode)
         return out
     else:
-        proc = sarge.run(command, cwd=cwd)
+        proc = sarge_run(command, cwd=cwd)
         check_exit_code(proc.returncode)
 
 
@@ -141,22 +141,27 @@ def push_doc(remote, branch, message, output, exclude, extra, tmp):
     repo_dir = os.path.join(tmp, 'repo')
     docs_dir = os.path.join(tmp, 'copy', output)
 
-    command = sarge.run('git clone {0} -b {1} repo'.format(remote, branch), cwd=tmp)
-    #command = sarge.run('git show-ref --verify --quiet refs/heads/gh-pages',
+    command = sarge_run('git clone {0} -b {1} repo'.format(remote, branch),
+                        cwd=tmp, stdout=DEVNULL, stderr=DEVNULL)
+    #command = sarge_run('git show-ref --verify --quiet refs/heads/gh-pages',
     #                    cwd=repo_dir)
 
     if command.returncode != 0:  # branch doesn't exists
-        run('git clone {} repo'.format(remote), cwd=tmp)
-        run('git checkout --orphan {}'.format(branch), cwd=repo_dir)
+        cprint('===  Creating new branch "{}"'.format(branch))
+        sarge_run('git clone {} repo'.format(remote), cwd=tmp,
+                  stdout=DEVNULL, stderr=DEVNULL)
+        sarge_run('git checkout --orphan {}'.format(branch), cwd=repo_dir,
+                  stdout=DEVNULL, stderr=DEVNULL)
 
-    run('git rm -rf .', cwd=repo_dir)
-    run('touch .nojekyll', cwd=repo_dir)
+    sarge_run('git rm -rf .', cwd=repo_dir, stdout=DEVNULL, stderr=DEVNULL)
+    sarge_run('touch .nojekyll', cwd=repo_dir, stdout=DEVNULL, stderr=DEVNULL)
     for entry in os.listdir(docs_dir):
         if entry not in exclude:
             shutil.move(os.path.join(docs_dir, entry), repo_dir)
 
-    run('git add -A', cwd=repo_dir)
-    run('git commit -m "{}"'.format(message), cwd=repo_dir)
+    sarge_run('git add -A', cwd=repo_dir, stdout=DEVNULL, stderr=DEVNULL)
+    sarge_run('git commit -m "{}"'.format(message), cwd=repo_dir,
+               stdout=DEVNULL, stderr=DEVNULL)
     run('git push origin {}'.format(branch), cwd=repo_dir)
 
     cprint ('===')

@@ -148,7 +148,13 @@ class TestGenerateOutput(TestCaseWithTmp):
 
 class TestPushDoc(TestCaseWithTmp):
 
-    def test_push(self):
+    @mock.patch('sphinx2git.cmdline.sarge_run')
+    def test_push(self, m):
+
+        m.side_effect = lambda *args, **kw: sarge.run(*args,
+                                                      **dict(kw,
+                                                             stdout=DEVNULL,
+                                                             stderr=DEVNULL))
 
         repo_dir = os.path.join(self.tempd, 'normal_repo')
         bare_dir = os.path.join(self.tempd, 'bare_repo')
@@ -164,12 +170,33 @@ class TestPushDoc(TestCaseWithTmp):
         sarge.capture_both('git clone --bare {} bare_repo'.format(repo_dir), cwd=self.tempd)
         # First push
         with tempfile.TemporaryDirectory(prefix='test') as tmp:
+
             output_dir = os.path.join(tmp, 'copy', 'output')
             os.makedirs(output_dir)
             sarge.capture_both('touch output.txt', cwd=output_dir, stdout=DEVNULL)
 
             #with mock.patch('sarge.run') as runmock:
             #   runmock = sarge.capture_both
+            #######################
+            '''oldout,olderr = sys.__stdout__, sys.__stderr__
+            try:
+                out=[StringIO(), StringIO()]
+                sys.__stdout__,sys.__stderr__ = out
+                push_doc(bare_dir, 'dev', 'Commit msg', 'output', ['exclude'], '', tmp)
+            finally:
+                sys.__stdout__,sys.__stderr__ = oldout, olderr'''
+
+            ##################
+            #with mock.patch('sphinx2git.cmdline.sarge.run',stdout=os.devnull ) as m:
+            #with mock.patch('sphinx2git.cmdline.sarge_run') as m:
+            #with mock.patch('sarge.run', sarge.run, stdout=os.devnull ):
+
+                #m.side_effect = lambda *args, **kw: sarge.run(*args, stdout=os.devnull, **kw)
+                #import ipdb; ipdb.set_trace()
+                #m.side_effect = lambda *args, **kw: sarge.capture_both(*args, **kw)
+                #m = sarge.run
+
+                    #mock.patch('sys.__stderr__', new_callable=StringIO) as mock_err:
             push_doc(bare_dir, 'dev', 'Commit msg', 'output', ['exclude'], '', tmp)
 
             files = sarge.get_stdout('git ls-tree --name-only -r dev', cwd=bare_dir)
@@ -196,4 +223,6 @@ class TestPushDoc(TestCaseWithTmp):
 
 
 
-
+def mock_run(*args, **kwargs):
+    kw = dict(kwargs, stdout=os.devnull)
+    return sarge.run(*args, **kw)
