@@ -141,27 +141,25 @@ def push_doc(remote, branch, message, output, exclude, extra, tmp):
     repo_dir = os.path.join(tmp, 'repo')
     docs_dir = os.path.join(tmp, 'copy', output)
 
-    command = sarge_run('git clone {0} -b {1} repo'.format(remote, branch),
-                        cwd=tmp, stdout=DEVNULL, stderr=DEVNULL)
-    #command = sarge_run('git show-ref --verify --quiet refs/heads/gh-pages',
-    #                    cwd=repo_dir)
+    run('git clone {0} -b {1} repo'.format(remote, branch), cwd=tmp)
+
+    command = sarge_run('git show-ref --verify --quiet refs/heads/{}'.format(branch),
+                        cwd=repo_dir)
 
     if command.returncode != 0:  # branch doesn't exists
         cprint('===  Creating new branch "{}"'.format(branch))
-        sarge_run('git clone {} repo'.format(remote), cwd=tmp,
-                  stdout=DEVNULL, stderr=DEVNULL)
-        sarge_run('git checkout --orphan {}'.format(branch), cwd=repo_dir,
-                  stdout=DEVNULL, stderr=DEVNULL)
+        #run('git clone {} repo'.format(remote), cwd=tmp)
+        run('git checkout --orphan {}'.format(branch), cwd=repo_dir)
 
-    sarge_run('git rm -rf .', cwd=repo_dir, stdout=DEVNULL, stderr=DEVNULL)
-    sarge_run('touch .nojekyll', cwd=repo_dir, stdout=DEVNULL, stderr=DEVNULL)
+    run('git rm -rf .', cwd=repo_dir)
+    run('touch .nojekyll', cwd=repo_dir)
+
     for entry in os.listdir(docs_dir):
         if entry not in exclude:
             shutil.move(os.path.join(docs_dir, entry), repo_dir)
 
-    sarge_run('git add -A', cwd=repo_dir, stdout=DEVNULL, stderr=DEVNULL)
-    sarge_run('git commit -m "{}"'.format(message), cwd=repo_dir,
-               stdout=DEVNULL, stderr=DEVNULL)
+    run('git add -A', cwd=repo_dir)
+    run('git commit -m "{}"'.format(message), cwd=repo_dir)
     run('git push origin {}'.format(branch), cwd=repo_dir)
 
     cprint ('===')
@@ -174,7 +172,7 @@ def generate_output(command, tmp):
     #with tempfile.TemporaryDirectory(prefix='d2g_generated_doc') as tmp:
 
     temp_dir = os.path.join(tmp, 'copy')
-    shutil.copytree(GITPATH, temp_dir, ignore=shutil.ignore_patterns('.git'))
+    shutil.copytree(GITPATH, temp_dir, ignore=shutil.ignore_patterns('.*'))
 
     run(command, cwd=temp_dir)
 
@@ -196,5 +194,11 @@ def main():
     with tempfile.TemporaryDirectory(prefix='d2g_') as tmp:
         generate_output(conf['doc']['command'], tmp)
 
-        push_doc(remote, conf['doc']['branch'], conf['doc']['output_folder'],
-                 conf['doc']['exclude'], conf['doc']['extra'], tmp)
+        # Comma separated values to list
+        exclude = tuple(map(str.strip, conf['doc']['exclude'].split(',')))
+
+        push_doc(remote=remote, branch=conf['git']['branch'],
+                 message=conf['git']['message'],
+                 output=conf['doc']['output_folder'],
+                 exclude=exclude, extra=conf['doc']['extra'],
+                 tmp=tmp)

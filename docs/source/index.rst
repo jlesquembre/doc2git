@@ -1,25 +1,7 @@
-=================================================
-pytag - Yet another tool to handle audio metadata
-=================================================
+================================================
+ doc2git -- Generate content and push it to git
+================================================
 
-pytag is a Python 3 library to handle audio metadata.
-
-**Contents:**
-
-.. toctree::
-   :maxdepth: 2
-
-   intro
-   usage
-   support
-   reference
-
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+doc2git is helper tool to generate static content and push it to a remote git
+repository.
 

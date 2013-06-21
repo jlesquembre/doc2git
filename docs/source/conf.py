@@ -13,7 +13,6 @@
 # serve to show the default.
 
 import sys, os, subprocess
-#import sphinx_bootstrap_theme
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -47,7 +46,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = 'pytag'
+project = 'doc2git'
 copyright = '2013, José Luis Lafuente'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -187,7 +186,7 @@ html_sidebars = {
 #html_file_suffix = None
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'pytagdoc'
+#htmlhelp_basename = 'pytagdoc'
 
 
 # -- Options for LaTeX output --------------------------------------------------
@@ -205,10 +204,10 @@ latex_elements = {
 
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
-latex_documents = [
+'''latex_documents = [
   ('index', 'pytag.tex', 'pytag Documentation',
    'José Luis Lafuente', 'manual'),
-]
+]'''
 
 # The name of an image file (relative to this directory) to place at the top of
 # the title page.
@@ -235,10 +234,10 @@ latex_documents = [
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
-man_pages = [
+'''man_pages = [
     ('index', 'pytag', 'pytag Documentation',
      ['José Luis Lafuente'], 1)
-]
+]'''
 
 # If true, show URL addresses after external links.
 #man_show_urls = False
@@ -249,11 +248,12 @@ man_pages = [
 # Grouping the document tree into Texinfo files. List of tuples
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
-texinfo_documents = [
+
+'''texinfo_documents = [
   ('index', 'pytag', 'pytag Documentation',
    'José Luis Lafuente', 'pytag', 'One line description of project.',
    'Miscellaneous'),
-]
+]'''
 
 # Documents to append as an appendix to all manuals.
 #texinfo_appendices = []
