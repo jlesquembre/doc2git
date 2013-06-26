@@ -146,8 +146,30 @@ class TestGenerateOutput(TestCaseWithTmp):
 
 
 
-class TestPushDoc(TestCaseWithTmp):
+class TestMain(TestCaseWithTmp):
 
+    @mock.patch('sphinx2git.cmdline.sarge_run')
+    def test_main(self, m):
+        m.side_effect = lambda *args, **kw: sarge.run(*args,
+                                                      **dict(kw,
+                                                             stdout=DEVNULL,
+                                                             stderr=DEVNULL))
+        # Create git repo to simulate our real git repo
+        repo_dir = os.path.join(self.tempd, 'normal_repo')
+        bare_dir = os.path.join(self.tempd, 'bare_repo')
+
+        os.makedirs(repo_dir)
+
+        sarge.capture_both('touch readme', cwd=repo_dir, stdout=DEVNULL)
+        sarge.capture_both('git init', cwd=repo_dir, stdout=DEVNULL)
+        sarge.capture_both('git add .', cwd=repo_dir, stdout=DEVNULL)
+        sarge.capture_both('git commit -m "Test"', cwd=repo_dir, stdout=DEVNULL)
+
+        # Create git repo to be used as remote
+        sarge.capture_both('git clone --bare {} bare_repo'.format(repo_dir), cwd=self.tempd)
+
+
+class TestPushDoc(TestCaseWithTmp):
     @mock.patch('sphinx2git.cmdline.sarge_run')
     def test_push(self, m):
 
@@ -222,7 +244,7 @@ class TestPushDoc(TestCaseWithTmp):
 
 
 
-
+# TODO remove
 def mock_run(*args, **kwargs):
     kw = dict(kwargs, stdout=os.devnull)
     return sarge.run(*args, **kw)

@@ -26,8 +26,6 @@ def cprint(*text, color=HEAD):
     if color:
         code = '\033[{}m'.format(color)
         print (code, out, ENDC)
-    else:
-        print (out)
 
 
 GITPATH = None
@@ -141,7 +139,15 @@ def push_doc(remote, branch, message, output, exclude, extra, tmp):
     repo_dir = os.path.join(tmp, 'repo')
     docs_dir = os.path.join(tmp, 'copy', output)
 
-    run('git clone {0} -b {1} repo'.format(remote, branch), cwd=tmp)
+    #import ipdb; ipdb.set_trace()
+    #run('git clone {0} -b {1} repo'.format(remote, branch), cwd=tmp)
+
+    command = sarge_run('git clone {0} -b {1} repo'.format(remote, branch),
+                        cwd=tmp, stdout=DEVNULL, stderr=DEVNULL)
+
+    #TODO check git versions, last command fails with git 1.8
+    if command.returncode != 0:  # branch doesn't exists and nothing was checked.
+        run('git clone {} repo'.format(remote), cwd=tmp)
 
     command = sarge_run('git show-ref --verify --quiet refs/heads/{}'.format(branch),
                         cwd=repo_dir)
@@ -184,10 +190,10 @@ def main():
 
     conf = get_conf()
 
-    if conf['git']['remote'] == '':
-        remote_name = None
-    else:
-        remote_name = conf['git']['remote']
+    #if conf['git']['remote'] == '':
+    #    remote_name = None
+    #else:
+    #    remote_name = conf['git']['remote']
 
     remote = get_remote(conf['git']['service'], conf['git']['remote'])
 
