@@ -136,10 +136,6 @@ class TestGenerateOutput(TestCaseWithTmp):
             self.assertTrue(os.path.exists(os.path.join(tmp_test, 'test_dir')))
             self.assertFalse(os.path.exists(os.path.join(tmp_test, '.git')))
 
-def set_git_user(cwd):
-    sarge.run('git config user.email "you@example.com"', cwd=cwd, stdout=DEVNULL)
-    sarge.run('git config user.name "Your Name"', cwd=cwd, stdout=DEVNULL)
-
 
 class TestMain(TestCaseWithTmp):
 
@@ -158,14 +154,12 @@ class TestMain(TestCaseWithTmp):
         # Create git repo to simulate our real git repo
         sarge.run('touch readme', cwd=repo_dir, stdout=DEVNULL)
         sarge.run('git init', cwd=repo_dir, stdout=DEVNULL)
-        set_git_user(repo_dir)
         sarge.run('git add .', cwd=repo_dir, stdout=DEVNULL)
         sarge.run('git commit -m "Test"', cwd=repo_dir, stdout=DEVNULL)
 
         # Create git repo to be used as remote
         sarge.run('git --bare init', cwd=bare_dir,
                   stdout=DEVNULL, stderr=DEVNULL)
-        set_git_user(bare_dir)
         sarge.run('git remote add origin {}'.format(bare_dir), cwd=repo_dir,
                   stdout=DEVNULL, stderr=DEVNULL)
         sarge.run('git push origin master', cwd=repo_dir,
@@ -215,13 +209,11 @@ class TestPushDoc(TestCaseWithTmp):
         # Create git repo to be used as remote
         sarge.run('touch readme', cwd=repo_dir, stdout=DEVNULL)
         sarge.run('git init', cwd=repo_dir, stdout=DEVNULL)
-        set_git_user(repo_dir)
         sarge.run('git add .', cwd=repo_dir, stdout=DEVNULL)
         sarge.run('git commit -m "Test"', cwd=repo_dir, stdout=DEVNULL)
 
         sarge.run('git clone --bare {} bare_repo'.format(repo_dir),
                   cwd=self.tempd, stdout=DEVNULL)
-        set_git_user(bare_dir)
         # First push
         with tempfile.TemporaryDirectory(prefix='test') as tmp:
 
