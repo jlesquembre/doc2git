@@ -35,7 +35,7 @@ Is also possible run with:
     d2g
 
 
-You spend 4 characters :-)
+You save 4 characters :-)
 
 
 Configuration

@@ -7,20 +7,21 @@ import configparser
 import sys
 from sarge import run as sarge_run, capture_stdout
 
+
 DOCS = 'docs/source'
 EXCLUDE = ['.buildinfo']
-INI_FILE = 's2g.ini'
+INI_FILE = 'd2g.ini'
 
 HEAD = 95
 BLUE = 94
-OK   = 92
+OK = 92
 WARN = 93
 FAIL = 91
 ENDC = '\033[0m'
 
-def cprint(*text, color=HEAD):
 
-    out = '{}'* len(text)
+def cprint(*text, color=HEAD):
+    out = '{}' * len(text)
     out = out.format(*text)
 
     if color:
@@ -30,11 +31,12 @@ def cprint(*text, color=HEAD):
 
 GITPATH = None
 
+
 def get_git_path():
     wd = os.getcwd()
 
     while wd != '/':
-        path = os.path.join(wd,'.git')
+        path = os.path.join(wd, '.git')
         if os.path.exists(path):
             return wd
 
@@ -42,8 +44,6 @@ def get_git_path():
 
     cprint('!!!  Not a git repository', color=FAIL)
     sys.exit(0)
-
-
 
 
 def get_conf():
@@ -70,24 +70,11 @@ def get_conf():
                 config[section][key]  # Only allow existing keys
                 config[section][key] = user_config[section][key]
     except KeyError:
-        cprint('###  Unknow option: ', key,' in section ', section, color=WARN )
-
+        cprint('###  Unknow option: ', key, ' in section ', section,
+               color=WARN)
 
     return config
 
-
-'''def run(command, capture_out=True, show_err=False):
-
-    output = subprocess.PIPE if capture_out else None
-    err = subprocess.DEVNULL if capture_out else None
-
-    with subprocess.Popen(shlex.split(command), stdout=output,
-            stderr=err, universal_newlines=True) as proc:
-
-        out = proc.stdout.read() if capture_out else ''
-        ret = proc.poll()
-
-    return out.strip(), ret'''
 
 def check_exit_code(code):
     if code != 0:
@@ -102,10 +89,10 @@ def run(command, get_output=False, cwd=None):
     if cwd is None:
         cwd = GITPATH
 
-    cprint ('===')
-    cprint ('===  Command: ', command)
-    cprint ('===  CWD:     ', cwd)
-    cprint ('===')
+    cprint('===')
+    cprint('===  Command: ', command)
+    cprint('===  CWD:     ', cwd)
+    cprint('===')
 
     if get_output:
         proc = capture_stdout(command, cwd=cwd)
@@ -118,9 +105,6 @@ def run(command, get_output=False, cwd=None):
         check_exit_code(proc.returncode)
 
 
-
-
-
 def get_remote(service, remote_name=''):
     out = run('git remote -v', get_output=True)
 
@@ -131,7 +115,8 @@ def get_remote(service, remote_name=''):
             elif line.split()[0] == remote_name:
                 return line.split()[1]
 
-    cprint('!!!  No remote url remote found, set one with "git remote add <name> <url>"', color=FAIL)
+    cprint('!!!  No remote url remote found, set one with "git remote add'
+           ' <name> <url>"', color=FAIL)
     sys.exit(0)
 
 
@@ -139,26 +124,28 @@ def push_doc(remote, branch, message, output, exclude, extra, tmp):
     repo_dir = os.path.join(tmp, 'repo')
     docs_dir = os.path.join(tmp, 'copy', output)
 
-    #import ipdb; ipdb.set_trace()
-    #run('git clone {0} -b {1} repo'.format(remote, branch), cwd=tmp)
-
+    # Try to clone the repo branch
     command = sarge_run('git clone {0} -b {1} repo'.format(remote, branch),
                         cwd=tmp, stdout=DEVNULL, stderr=DEVNULL)
 
-    #TODO check git versions, last command fails with git 1.8
-    if command.returncode != 0:  # branch doesn't exists and nothing was checked.
+    # Some git versions fails if there is no branch, others clone master intead
+    # If command failed, nothing was cloned, clone master in this case
+    if command.returncode != 0:
         run('git clone {} repo'.format(remote), cwd=tmp)
 
-    command = sarge_run('git show-ref --verify --quiet refs/heads/{}'.format(branch),
-                        cwd=repo_dir)
+    # With old git versions, if remote branch not found, use HEAD instead,
+    # check if the branch really exists
+    command = sarge_run(
+        'git show-ref --verify --quiet refs/heads/{}'.format(branch),
+        cwd=repo_dir)
 
     if command.returncode != 0:  # branch doesn't exists
         cprint('===  Creating new branch "{}"'.format(branch))
-        #run('git clone {} repo'.format(remote), cwd=tmp)
         run('git checkout --orphan {}'.format(branch), cwd=repo_dir)
 
     run('git rm -rf .', cwd=repo_dir)
-    run('touch .nojekyll', cwd=repo_dir)
+    for entry in extra:
+        run('touch {}'.format(entry), cwd=repo_dir)
 
     for entry in os.listdir(docs_dir):
         if entry not in exclude:
@@ -168,19 +155,20 @@ def push_doc(remote, branch, message, output, exclude, extra, tmp):
     run('git commit -m "{}"'.format(message), cwd=repo_dir)
     run('git push origin {}'.format(branch), cwd=repo_dir)
 
-    cprint ('===')
-    cprint ('===  Documentation pushed.')
-    cprint ('===')
+    cprint('===')
+    cprint('===  Documentation pushed.')
+    cprint('===')
 
 
 def generate_output(command, tmp):
-
-    #with tempfile.TemporaryDirectory(prefix='d2g_generated_doc') as tmp:
-
     temp_dir = os.path.join(tmp, 'copy')
     shutil.copytree(GITPATH, temp_dir, ignore=shutil.ignore_patterns('.*'))
 
     run(command, cwd=temp_dir)
+
+
+def comma_separated_to_list(values):
+    return list(map(str.strip, values.split(',')))
 
 
 def main():
@@ -190,21 +178,17 @@ def main():
 
     conf = get_conf()
 
-    #if conf['git']['remote'] == '':
-    #    remote_name = None
-    #else:
-    #    remote_name = conf['git']['remote']
-
     remote = get_remote(conf['git']['service'], conf['git']['remote'])
 
     with tempfile.TemporaryDirectory(prefix='d2g_') as tmp:
         generate_output(conf['doc']['command'], tmp)
 
         # Comma separated values to list
-        exclude = tuple(map(str.strip, conf['doc']['exclude'].split(',')))
+        exclude = comma_separated_to_list(conf['doc']['exclude'])
+        extra = comma_separated_to_list(conf['doc']['extra'])
 
         push_doc(remote=remote, branch=conf['git']['branch'],
                  message=conf['git']['message'],
                  output=conf['doc']['output_folder'],
-                 exclude=exclude, extra=conf['doc']['extra'],
+                 exclude=exclude, extra=extra,
                  tmp=tmp)
