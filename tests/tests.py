@@ -3,14 +3,22 @@ import os
 import shutil
 import sys
 from io import StringIO
-from configparser import ConfigParser
-from subprocess import DEVNULL
-
 from unittest import TestCase
+
+try:
+    from subprocess import DEVNULL
+except ImportError:
+    from os import devnull as DEVNULL
+
 try:
     from unittest import mock
 except ImportError:
     import mock
+
+try:
+    from configparser import ConfigParser
+except ImportError:
+    from ConfigParser import ConfigParser
 
 import sarge
 

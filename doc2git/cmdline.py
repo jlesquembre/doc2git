@@ -1,9 +1,18 @@
-from subprocess import DEVNULL
 import os
 import tempfile
 import shutil
-import configparser
 import sys
+
+try:
+    from configparser import ConfigParser
+except ImportError:
+    from ConfigParser import ConfigParser
+
+try:
+    from subprocess import DEVNULL
+except ImportError:
+    from os import devnull as DEVNULL
+
 from sarge import run as sarge_run, capture_stdout
 
 
@@ -49,7 +58,7 @@ def get_conf():
 
     config_filename = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                    'config', INI_FILE)
-    config = configparser.ConfigParser()
+    config = ConfigParser()
     config.read(config_filename)
 
     user_config_path = os.path.join(GITPATH, INI_FILE)
@@ -58,7 +67,7 @@ def get_conf():
         cprint('===  User configuration not found, using default values.')
         return config
 
-    user_config = configparser.ConfigParser()
+    user_config = ConfigParser()
     user_config.read(user_config_path)
 
     cprint('===  User configuration found.')
