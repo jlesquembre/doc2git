@@ -6,7 +6,7 @@ with open(os.path.join(here, 'README.rst'), 'rt') as f:
     README = f.read()
 
 setup(name='doc2git',
-      version='0.1.1',
+      version='0.1.0',
       author='José Luis Lafuente',
       author_email='jlesquembre@gmail.com',
       description='Helper to commit generated documents to git',
@@ -31,5 +31,5 @@ setup(name='doc2git',
             'd2g = doc2git.cmdline:main',
           ],
         },
-      requires=['sarge']
+      install_requires=['sarge']
     )
