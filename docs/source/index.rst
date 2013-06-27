@@ -23,14 +23,14 @@ Basic usage
 
 In any folder of your git repository run:
 
-.. bash::
+.. code-block:: bash
 
     doc2git
 
 
 Is also possible run with:
 
-.. bash::
+.. code-block:: bash
 
     d2g
 

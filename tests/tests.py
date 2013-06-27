@@ -14,8 +14,8 @@ except ImportError:
 
 import sarge
 
-from sphinx2git import cmdline
-from sphinx2git.cmdline import (get_git_path, get_conf, run, get_remote, main,
+from doc2git import cmdline
+from doc2git.cmdline import (get_git_path, get_conf, run, get_remote, main,
                                 generate_output, push_doc)
 
 
@@ -103,19 +103,19 @@ class TestGetGitRemote(TestCaseWithTmp):
                         foo     git@github.com:foo/bar.git (push)'''
 
     def test_get_first_remote(self):
-        with mock.patch('sphinx2git.cmdline.run') as runmock:
+        with mock.patch('doc2git.cmdline.run') as runmock:
             runmock.return_value = self.cmdout
             self.assertEqual(get_remote('github'),
                              'git@github.com:user/repo.git')
 
     def test_get_remote_with_name(self):
-        with mock.patch('sphinx2git.cmdline.run') as runmock:
+        with mock.patch('doc2git.cmdline.run') as runmock:
             runmock.return_value = self.cmdout
             self.assertEqual(get_remote('github', 'foo'),
                              'git@github.com:foo/bar.git')
 
     def test_remote_no_exists(self):
-        with mock.patch('sphinx2git.cmdline.run') as runmock:
+        with mock.patch('doc2git.cmdline.run') as runmock:
             runmock.return_value = self.cmdout
             self.assertRaises(SystemExit, get_remote, 'bitbucket')
 
@@ -139,7 +139,7 @@ class TestGenerateOutput(TestCaseWithTmp):
 
 class TestMain(TestCaseWithTmp):
 
-    @mock.patch('sphinx2git.cmdline.sarge_run')
+    @mock.patch('doc2git.cmdline.sarge_run')
     def test_main(self, m):
         m.side_effect = lambda *args, **kw: sarge.run(*args,
                                                       **dict(kw,
@@ -193,7 +193,7 @@ class TestMain(TestCaseWithTmp):
 
 
 class TestPushDoc(TestCaseWithTmp):
-    @mock.patch('sphinx2git.cmdline.sarge_run')
+    @mock.patch('doc2git.cmdline.sarge_run')
     def test_push(self, m):
 
         m.side_effect = lambda *args, **kw: sarge.run(*args,

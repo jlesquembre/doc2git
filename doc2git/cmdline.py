@@ -2,7 +2,6 @@ from subprocess import DEVNULL
 import os
 import tempfile
 import shutil
-import shlex
 import configparser
 import sys
 from sarge import run as sarge_run, capture_stdout
@@ -26,7 +25,7 @@ def cprint(*text, color=HEAD):
 
     if color:
         code = '\033[{}m'.format(color)
-        print (code, out, ENDC)
+        print(code, out, ENDC)
 
 
 GITPATH = None
