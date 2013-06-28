@@ -17,6 +17,6 @@ Status
 .. image:: https://secure.travis-ci.org/jlesquembre/doc2git.png?branch=master
     :target: http://travis-ci.org/jlesquembre/doc2git
 
-.. image:: https://coveralls.io/repos/jlesquembre/doc2git.png?branch=master
+.. image:: https://coveralls.io/repos/jlesquembre/doc2git/badge.png?branch=master
     :target: https://coveralls.io/r/jlesquembre/doc2git?branch=master
     :alt: Coverage Status
