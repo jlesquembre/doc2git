@@ -4,27 +4,15 @@ import shutil
 import sys
 from io import StringIO
 from unittest import TestCase
-
-try:
-    from subprocess import DEVNULL
-except ImportError:
-    from os import devnull as DEVNULL
-
-try:
-    from unittest import mock
-except ImportError:
-    import mock
-
-try:
-    from configparser import ConfigParser
-except ImportError:
-    from ConfigParser import ConfigParser
+from subprocess import DEVNULL
+from unittest import mock
+from configparser import ConfigParser
 
 import sarge
 
 from doc2git import cmdline
 from doc2git.cmdline import (get_git_path, get_conf, run, get_remote, main,
-                                generate_output, push_doc)
+                             generate_output, push_doc)
 
 
 class TestCaseWithTmp(TestCase):

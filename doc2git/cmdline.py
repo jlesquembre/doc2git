@@ -3,15 +3,8 @@ import tempfile
 import shutil
 import sys
 
-try:
-    from configparser import ConfigParser
-except ImportError:
-    from ConfigParser import ConfigParser
-
-try:
-    from subprocess import DEVNULL
-except ImportError:
-    from os import devnull as DEVNULL
+from configparser import ConfigParser
+from subprocess import DEVNULL
 
 from sarge import run as sarge_run, capture_stdout
 
@@ -32,9 +25,8 @@ def cprint(*text, color=HEAD):
     out = '{}' * len(text)
     out = out.format(*text)
 
-    if color:
-        code = '\033[{}m'.format(color)
-        print(code, out, ENDC)
+    code = '\033[{}m'.format(color)
+    print(code, out, ENDC)
 
 
 GITPATH = None
