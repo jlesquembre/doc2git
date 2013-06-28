@@ -69,7 +69,8 @@ For example, if you want to change the commit message, create this file:
 
 .. code-block:: ini
 
-    [git] message = My custom message for every docummentation commit.
+    [git]
+    message = My custom message for every documentation commit.
 
 
 All the other options have the default value, only ``message`` was changed.
