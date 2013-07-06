@@ -1,2 +1,4 @@
-include README.rst LICENSE
+include README.rst
+include LICENSE
+
 recursive-include doc2git/config *

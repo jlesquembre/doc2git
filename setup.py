@@ -6,7 +6,7 @@ with open(os.path.join(here, 'README.rst'), 'rt') as f:
     README = f.read()
 
 setup(name='doc2git',
-      version='0.1.1',
+      version='0.1.5',
       author='José Luis Lafuente',
       author_email='jlesquembre@gmail.com',
       description='Helper to commit generated documents to git',
@@ -14,7 +14,7 @@ setup(name='doc2git',
       license='GNU General Public License v3 (GPLv3)',
       url='http://jlesquembre.github.io/doc2git/',
       packages=['doc2git'],
-      package_data={'src': ['config/*',]},
+      include_package_data=True,
       classifiers=[
         'Development Status :: 3 - Alpha',
         'Topic :: Utilities',
