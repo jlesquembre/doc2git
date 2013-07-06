@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>doc2git – Generate content and push it to git &mdash; doc2git 0.1.1 documentation</title>
+    <title>doc2git – Generate content and push it to git &mdash; doc2git 0.1.5 documentation</title>
     
     <link rel="stylesheet" href="_static/pyramid.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.1.1',
+        VERSION:     '0.1.5',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="doc2git 0.1.1 documentation" href="#" />
+    <link rel="top" title="doc2git 0.1.5 documentation" href="#" />
 <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
 <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Nobile:regular,italic,bold,bolditalic&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
 <!--[if lte IE 6]>
@@ -40,7 +40,7 @@
         <li class="right" style="margin-right: 10px">
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
-        <li><a href="#">doc2git 0.1.1 documentation</a> &raquo;</li> 
+        <li><a href="#">doc2git 0.1.5 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -54,6 +54,92 @@
 <p>doc2git is helper tool to generate static content and push it to a remote git
 repository.</p>
 </div>
+<div class="section" id="introduction">
+<h1>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="requeriments">
+<h2>Requeriments<a class="headerlink" href="#requeriments" title="Permalink to this headline">¶</a></h2>
+<p>doc2git needs <a class="reference external" href="http://python.org">Python</a> 3.3 or better</p>
+</div>
+<div class="section" id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-bash"><div class="highlight"><pre>pip install doc2git
+</pre></div>
+</div>
+</div>
+<div class="section" id="basic-usage">
+<h2>Basic usage<a class="headerlink" href="#basic-usage" title="Permalink to this headline">¶</a></h2>
+<p>In any folder of your git repository run:</p>
+<div class="highlight-bash"><div class="highlight"><pre>doc2git
+</pre></div>
+</div>
+<p>Is also possible run with:</p>
+<div class="highlight-bash"><div class="highlight"><pre>d2g
+</pre></div>
+</div>
+<p>You save 4 characters :-)</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Create a file called <tt class="docutils literal"><span class="pre">d2g.ini</span></tt> in the git repository root folder to tell
+to doc2git what should do, see next section for a better explanation.</p>
+</div>
+</div>
+<div class="section" id="configuration">
+<h2>Configuration<a class="headerlink" href="#configuration" title="Permalink to this headline">¶</a></h2>
+<p>This is the default doc2git configuration file:</p>
+<blockquote>
+<div><div class="highlight-ini"><div class="highlight"><pre><span class="k">[doc]</span>
+
+<span class="c1"># Command to generate the documents.</span>
+<span class="na">command</span> <span class="o">=</span> <span class="s">sphinx-build -W -b html docs/source html_output</span>
+
+<span class="c1"># Path to the folder with the generated documentation. Is relative to the git</span>
+<span class="c1"># repository (the folder where your .git folder lives). Files in this folder</span>
+<span class="c1"># are pushed.</span>
+<span class="na">output_folder</span> <span class="o">=</span> <span class="s">html_output</span>
+
+<span class="c1"># If you don&#39;t want to commit some file in the output_folder, list them here.</span>
+<span class="c1"># Multiple items are comma separated.</span>
+<span class="na">exclude</span> <span class="o">=</span> <span class="s">.buildinfo, .doctrees</span>
+
+<span class="c1"># Create some extra files to the commit. This files are created with the</span>
+<span class="c1"># &#39;touch&#39; command and are empty.</span>
+<span class="c1"># Multiple items are comma separated.</span>
+<span class="na">extra</span> <span class="o">=</span> <span class="s">.nojekyll</span>
+
+
+<span class="k">[git]</span>
+
+<span class="c1"># Name of the remote repository where you want to push the generated content,</span>
+<span class="c1"># usually origin.</span>
+<span class="c1"># If empty, doc2git use the first remote found returned by the command</span>
+<span class="c1"># &quot;git remote -v&quot;. This remote also has to match the service</span>
+<span class="na">remote</span> <span class="o">=</span>
+
+<span class="c1"># Service name where you want to push your documentation. This name is used to</span>
+<span class="c1"># look for git remotes.</span>
+<span class="na">service</span> <span class="o">=</span> <span class="s">github.com</span>
+
+<span class="c1"># Branch name where you want to push. Is created if does&#39;t exist.</span>
+<span class="na">branch</span> <span class="o">=</span> <span class="s">gh-pages</span>
+
+<span class="c1"># Commit message.</span>
+<span class="na">message</span> <span class="o">=</span> <span class="s">Autogenerated github-pages</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>As you can see, default options are for create sphinx documentation and push it
+to github, but is possible to overwrite any of this options.</p>
+<p>doc2git checks for a ini file called <tt class="docutils literal"><span class="pre">d2g.ini</span></tt> in your git root repository
+folder (the folder with <tt class="docutils literal"><span class="pre">.git</span></tt> folder). If you want to overwrite the default
+cofiguration, be sure that the file name and its location are correct.</p>
+<p>For example, if you want to change the commit message, create this file:</p>
+<div class="highlight-ini"><div class="highlight"><pre><span class="k">[git]</span>
+<span class="na">message</span> <span class="o">=</span> <span class="s">My custom message for every documentation commit.</span>
+</pre></div>
+</div>
+<p>All the other options have the default value, only <tt class="docutils literal"><span class="pre">message</span></tt> was changed.</p>
+</div>
+</div>
 
 
           </div>
@@ -62,11 +148,23 @@ repository.</p>
       <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper"><h3>Useful Links</h3>
 <ul>
-  <li><a href="https://pypi.python.org/pypi/pytag">pytag @ PyPI</a></li>
-  <li><a href="https://github.com/jlesquembre/pytag">pytag @ github</a></li>
-  <li><a href="https://github.com/jlesquembre/pytag/issues">report an error</a></li>
+  <li><a href="https://pypi.python.org/pypi/doc2git">doc2git @ PyPI</a></li>
+  <li><a href="https://github.com/jlesquembre/doc2git">doc2git @ github</a></li>
+  <li><a href="https://github.com/jlesquembre/doc2git/issues">report an error</a></li>
 
 </ul>
+  <h3><a href="#">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">doc2git &#8211; Generate content and push it to git</a></li>
+<li><a class="reference internal" href="#introduction">Introduction</a><ul>
+<li><a class="reference internal" href="#requeriments">Requeriments</a></li>
+<li><a class="reference internal" href="#installation">Installation</a></li>
+<li><a class="reference internal" href="#basic-usage">Basic usage</a></li>
+<li><a class="reference internal" href="#configuration">Configuration</a></li>
+</ul>
+</li>
+</ul>
+
 <div id="searchbox" style="display: none">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
@@ -95,7 +193,7 @@ repository.</p>
         <li class="right" style="margin-right: 10px">
           <a href="genindex.html" title="General Index"
              >index</a></li>
-        <li><a href="#">doc2git 0.1.1 documentation</a> &raquo;</li> 
+        <li><a href="#">doc2git 0.1.5 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
