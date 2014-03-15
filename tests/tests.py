@@ -127,7 +127,7 @@ class TestGenerateOutput(TestCaseWithTmp):
                 tempfile.TemporaryDirectory(prefix='d2g_') as tmp:
 
             generate_output(sarge.shell_format('cp -r test_dir {0}', tmp_test),
-                            tmp)
+                            tmp, [])
 
             self.assertTrue(os.path.exists(os.path.join(tmp_test, 'test_dir')))
             self.assertFalse(os.path.exists(os.path.join(tmp_test, '.git')))

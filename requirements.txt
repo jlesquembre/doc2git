@@ -1,0 +1,11 @@
+Sphinx
+sphinxcontrib-napoleon
+coverage
+ipython
+ipdb
+nose
+see
+pep8
+jlle
+tox
+-e .
