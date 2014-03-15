@@ -164,7 +164,8 @@ def generate_output(command, tmp, ignore_patterns):
     temp_dir = os.path.join(tmp, 'copy')
     ignore = ['.git']
     ignore.extend(ignore_patterns)
-    shutil.copytree(GITPATH, temp_dir, ignore=shutil.ignore_patterns(*ignore))
+    shutil.copytree(GITPATH, temp_dir, ignore=shutil.ignore_patterns(*ignore),
+                    symlinks=True)
 
     run(command, cwd=temp_dir)
 
