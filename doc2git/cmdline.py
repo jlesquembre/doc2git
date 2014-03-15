@@ -160,14 +160,20 @@ def push_doc(remote, branch, message, output, exclude, extra, tmp):
     cprint('===')
 
 
-def generate_output(command, tmp, ignore_patterns):
+def generate_output(commands, tmp, ignore_patterns):
     temp_dir = os.path.join(tmp, 'copy')
     ignore = ['.git']
     ignore.extend(ignore_patterns)
     shutil.copytree(GITPATH, temp_dir, ignore=shutil.ignore_patterns(*ignore),
                     symlinks=True)
 
-    run(command, cwd=temp_dir)
+    if '\n' in commands:
+        commands = value_as_list(commands)
+    else:
+        commands = [commands]
+
+    for command in commands:
+        run(command, cwd=temp_dir)
 
 
 def value_as_list(values):
