@@ -160,15 +160,17 @@ def push_doc(remote, branch, message, output, exclude, extra, tmp):
     cprint('===')
 
 
-def generate_output(command, tmp):
+def generate_output(command, tmp, ignore_patterns):
     temp_dir = os.path.join(tmp, 'copy')
-    shutil.copytree(GITPATH, temp_dir, ignore=shutil.ignore_patterns('.*'))
+    ignore = ['.git']
+    ignore.extend(ignore_patterns)
+    shutil.copytree(GITPATH, temp_dir, ignore=shutil.ignore_patterns(*ignore))
 
     run(command, cwd=temp_dir)
 
 
-def comma_separated_to_list(values):
-    return list(map(str.strip, values.split(',')))
+def value_as_list(values):
+    return [x for x in list(map(str.strip, values.strip().split('\n'))) if x]
 
 
 def main():
@@ -178,14 +180,15 @@ def main():
 
     conf = get_conf()
 
+    ignore_patterns = value_as_list(conf['doc']['ignore_patterns'])
     remote = get_remote(conf['git']['service'], conf['git']['remote'])
 
     with tempfile.TemporaryDirectory(prefix='d2g_') as tmp:
-        generate_output(conf['doc']['command'], tmp)
+        generate_output(conf['doc']['command'], tmp, ignore_patterns)
 
-        # Comma separated values to list
-        exclude = comma_separated_to_list(conf['doc']['exclude'])
-        extra = comma_separated_to_list(conf['doc']['extra'])
+        # Values to list
+        exclude = value_as_list(conf['doc']['exclude'])
+        extra = value_as_list(conf['doc']['extra'])
 
         push_doc(remote=remote, branch=conf['git']['branch'],
                  message=conf['git']['message'],
