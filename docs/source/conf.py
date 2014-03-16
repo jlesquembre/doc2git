@@ -36,7 +36,7 @@ extensions = ['sphinx.ext.autodoc', 'sphinx.ext.todo', 'sphinx.ext.coverage',
 intersphinx_mapping = {'python': ('http://docs.python.org/3', None)}
 
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ['_templates']
+#templates_path = ['_templates']
 
 # The suffix of source filenames.
 source_suffix = '.rst'
@@ -49,7 +49,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'doc2git'
-copyright = '2013, José Luis Lafuente'
+copyright = '{}, José Luis Lafuente'.format(datetime.datetime.now().year)
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -103,7 +103,15 @@ pygments_style = 'sphinx'
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-html_theme = 'pyramid'
+#import sphinx_rtd_theme
+#html_theme = "sphinx_rtd_theme"
+#html_theme = 'pyramid'
+#html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
+
+on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
+if not on_rtd:  # only import and set the theme if we're building docs locally
+    html_theme = "sphinx_rtd_theme"
+    html_theme_path = ["../_themes", ]
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
@@ -144,14 +152,14 @@ html_theme = 'pyramid'
 
 # Custom sidebar templates, maps document names to template names.
 #html_sidebars = {}
-html_sidebars = {
-   '**': [
-          'links.html',
-          'relations.html',
-          'localtoc.html',
-          'searchbox.html',
-          'sourcelink.html'],
-}
+#html_sidebars = {
+#   '**': [
+#          'links.html',
+#          'relations.html',
+#          'localtoc.html',
+#          'searchbox.html',
+#          'sourcelink.html'],
+#}
 
 # Additional templates that should be rendered to pages, maps page names to
 # template names.
